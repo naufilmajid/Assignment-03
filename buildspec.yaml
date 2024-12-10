@@ -1,0 +1,23 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin <AWS_ACCOUNT_ID>.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+  build:
+    commands:
+      - echo Building the Docker image...
+      - docker build -t lastname-ecs-app .
+      - echo Tagging the Docker image...
+      - docker tag lastname-ecs-app:latest <AWS_ACCOUNT_ID>.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lastname-ecs-app:latest
+  post_build:
+    commands:
+      - echo Pushing the Docker image...
+      - docker push <AWS_ACCOUNT_ID>.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/lastname-ecs-app:latest
+      - echo Build completed on `date`
+
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: yes
